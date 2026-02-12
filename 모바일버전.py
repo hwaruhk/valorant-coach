@@ -3,58 +3,46 @@ import streamlit as st
 # 페이지 설정
 st.set_page_config(page_title="HwaruhK Pro", layout="centered")
 
-# 수직형 나열 및 카테고리 강조 CSS
+# 강제 가로 배치 및 디자인 CSS
 st.markdown("""
     <style>
     .stApp { background-color: #0F1923; }
     
-    /* 상단 결과창: 가독성 중심 */
+    /* 상단 결과창 */
     .report-card {
-        background-color: #1F2326; padding: 20px; border-radius: 12px;
-        border: 1px solid #35393D; border-top: 5px solid #FF4655;
-        margin-bottom: 20px; text-align: center;
+        background-color: #1F2326; padding: 15px; border-radius: 8px;
+        border-bottom: 4px solid #00F5FF; margin-bottom: 15px;
     }
-    .stat-container { display: flex; justify-content: space-between; }
-    .stat-label { color: #8B9795; font-size: 12px; display: block; }
-    .stat-value { color: #ECE8E1; font-weight: bold; font-size: 24px; }
+    .stat-grid { display: flex; justify-content: space-around; text-align: center; }
+    .stat-label { color: #8B9795; font-size: 10px; display: block; }
+    .stat-value { color: #00F5FF; font-weight: bold; font-size: 20px; }
     
-    /* 카테고리 구분 칸 */
-    .category-container {
-        border: 1px solid #35393D;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 25px;
-        background-color: #161A1E;
+    /* 섹션 박스 */
+    .section-box {
+        background-color: #161A1E; border: 1px solid #35393D;
+        border-radius: 6px; padding: 10px; margin-bottom: 10px;
     }
-    .category-header {
-        color: #00F5FF; font-size: 13px; font-weight: bold;
-        margin-bottom: 15px; border-left: 3px solid #00F5FF; padding-left: 10px;
-    }
+    .section-title { font-size: 11px; color: #8B9795; font-weight: bold; margin-bottom: 8px; }
 
-    /* 버튼: 수직형으로 크게 */
+    /* 버튼 스타일 (가로 배치용) */
     button {
-        width: 100% !important; height: 60px !important;
-        font-weight: bold !important; font-size: 18px !important;
-        border-radius: 8px !important; margin-bottom: 10px !important;
+        width: 100% !important; height: 50px !important;
+        font-weight: bold !important; font-size: 14px !important;
+        border-radius: 4px !important; margin-bottom: 5px !important;
         background-color: #1F2326 !important; color: #ECE8E1 !important;
         border: 1px solid #35393D !important;
     }
-    
-    /* 강조 버튼 색상 */
     .cyan-btn button { background-color: #00F5FF !important; color: #0F1923 !important; border: none !important; }
     .red-btn button { background-color: #FF4655 !important; color: white !important; border: none !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# 데이터 초기화
+# 데이터 세션 초기화
 if 'data' not in st.session_state:
-    st.session_state.data = {
-        'fk_w': 0, 'fk_l': 0, 'fd_w': 0, 'fd_l': 0,
-        'tr_s': 0, 'deaths': 0, 'st_s': 0, 'st_p': 0, 'st_f': 0
-    }
+    st.session_state.data = {'fk_w':0,'fk_l':0,'fd_w':0,'fd_l':0,'tr_s':0,'deaths':0,'st_s':0,'st_p':0,'st_f':0}
 d = st.session_state.data
 
-# 데이터 계산
+# 결과 계산
 st_total = d['st_s'] + d['st_p'] + d['st_f']
 st_r = ((d['st_s'] + (d['st_p'] * 0.5)) / st_total * 100) if st_total > 0 else 0
 fk_total = d['fk_w'] + d['fk_l']; fk_r = (d['fk_w'] / fk_total * 100) if fk_total > 0 else 0
@@ -63,7 +51,7 @@ tr_r = (d['tr_s'] / d['deaths'] * 100) if d['deaths'] > 0 else 0
 # --- 상단 리포트 ---
 st.markdown(f"""
 <div class="report-card">
-    <div class="stat-container">
+    <div class="stat-grid">
         <div><span class="stat-label">STRAT</span><span class="stat-value">{st_r:.0f}%</span></div>
         <div><span class="stat-label">FK WIN</span><span class="stat-value">{fk_r:.0f}%</span></div>
         <div><span class="stat-label">TRADE</span><span class="stat-value">{tr_r:.0f}%</span></div>
@@ -71,39 +59,49 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- 섹션 1: STRATEGY (수직) ---
-st.markdown('<div class="category-container"><div class="category-header">01 STRATEGY</div>', unsafe_allow_html=True)
-st.markdown('<div class="cyan-btn">', unsafe_allow_html=True)
-if st.button("작전 성공", key="s1"): d['st_s'] += 1; st.rerun()
+# --- 섹션 1: STRATEGY (3열) ---
+st.markdown('<div class="section-box"><div class="section-title">STRATEGY</div>', unsafe_allow_html=True)
+c1, c2, c3 = st.columns(3)
+with c1:
+    st.markdown('<div class="cyan-btn">', unsafe_allow_html=True)
+    if st.button("성공", key="s1"): d['st_s'] += 1; st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+with c2:
+    if st.button("부분", key="s2"): d['st_p'] += 1; st.rerun()
+with c3:
+    st.markdown('<div class="red-btn">', unsafe_allow_html=True)
+    if st.button("실패", key="s3"): d['st_f'] += 1; st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
-if st.button("부분 성공", key="s2"): d['st_p'] += 1; st.rerun()
-st.markdown('<div class="red-btn">', unsafe_allow_html=True)
-if st.button("작전 실패", key="s3"): d['st_f'] += 1; st.rerun()
-st.markdown('</div></div>', unsafe_allow_html=True)
 
-# --- 섹션 2: OPENING (수직) ---
-st.markdown('<div class="category-container"><div class="category-header">02 OPENING DUELS</div>', unsafe_allow_html=True)
-st.markdown('<div class="cyan-btn">', unsafe_allow_html=True)
-if st.button("FK 승리", key="f1"): d['fk_w'] += 1; st.rerun()
+# --- 섹션 2: DUELS (2열) ---
+st.markdown('<div class="section-box"><div class="section-title">OPENING DUELS</div>', unsafe_allow_html=True)
+f1, f2 = st.columns(2)
+with f1:
+    st.markdown('<div class="cyan-btn">', unsafe_allow_html=True)
+    if st.button("FK 승리", key="f1"): d['fk_w'] += 1; st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+    if st.button("FD 승리", key="f2"): d['fd_w'] += 1; d['deaths'] += 1; st.rerun()
+with f2:
+    st.markdown('<div class="red-btn">', unsafe_allow_html=True)
+    if st.button("FK 패배", key="f3"): d['fk_l'] += 1; st.rerun()
+    if st.button("FD 패배", key="f4"): d['fd_l'] += 1; d['deaths'] += 1; st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('<div class="red-btn">', unsafe_allow_html=True)
-if st.button("FK 패배", key="f2"): d['fk_l'] += 1; st.rerun()
+
+# --- 섹션 3: COMBAT (2열) ---
+st.markdown('<div class="section-box"><div class="section-title">TEAM COMBAT</div>', unsafe_allow_html=True)
+t1, t2 = st.columns(2)
+with t1:
+    if st.button("팀 데스", key="t1"): d['deaths'] += 1; st.rerun()
+with t2:
+    st.markdown('<div class="cyan-btn">', unsafe_allow_html=True)
+    if st.button("트레이드", key="t2"): d['tr_s'] += 1; st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
-if st.button("FD 승리 (아군생존)", key="f3"): d['fd_w'] += 1; d['deaths'] += 1; st.rerun()
-st.markdown('<div class="red-btn">', unsafe_allow_html=True)
-if st.button("FD 패배 (아군사망)", key="f4"): d['fd_l'] += 1; d['deaths'] += 1; st.rerun()
-st.markdown('</div></div>', unsafe_allow_html=True)
 
-# --- 섹션 3: COMBAT (수직) ---
-st.markdown('<div class="category-container"><div class="category-header">03 TEAM COMBAT</div>', unsafe_allow_html=True)
-if st.button("아군 데스 발생", key="t1"): d['deaths'] += 1; st.rerun()
-st.markdown('<div class="cyan-btn">', unsafe_allow_html=True)
-if st.button("트레이드 성공", key="t2"): d['tr_s'] += 1; st.rerun()
-st.markdown('</div></div>', unsafe_allow_html=True)
-
-# 리셋 버튼
+# 리셋
 if st.button("♻️ RESET MATCH", use_container_width=True):
     for k in d.keys(): d[k] = 0
     st.rerun()
-
 
